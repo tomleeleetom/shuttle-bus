@@ -133,6 +133,7 @@ function buildCol(col, label, dir, accent) {
   const lab = col.addText(label);
   lab.font = Font.boldSystemFont(10);
   lab.textColor = accent;
+  lab.centerAlignText();
   col.addSpacer(4);
 
   if (i === -1) {
@@ -142,9 +143,11 @@ function buildCol(col, label, dir, accent) {
     const l1 = col.addText("已開出晒");
     l1.font = Font.boldSystemFont(14);
     l1.textColor = new Color("#ff8a80");
+    l1.centerAlignText();
     const l2 = col.addText("聽日 " + ttt[0]);
     l2.font = Font.systemFont(11);
     l2.textColor = new Color("#8ba3b5");
+    l2.centerAlignText();
     return;
   }
 
@@ -156,23 +159,27 @@ function buildCol(col, label, dir, accent) {
   const big = col.addText(next);
   big.font = Font.boldSystemFont(30);
   big.textColor = accent;
+  big.centerAlignText();
   const inn = col.addText(diffSec <= 0 ? "開緊" : "in " + diffMin + " min");
   inn.font = Font.boldSystemFont(13);
   inn.textColor = diffMin <= 2 ? new Color("#ff8a80") : new Color("#5ee0a0");
+  inn.centerAlignText();
   col.addSpacer(2);
   const after = tt.slice(i + 1, i + 3).join(" · ");
   const at = col.addText(after || "尾班車");
   at.font = Font.systemFont(9);
   at.textColor = new Color("#8ba3b5");
+  at.centerAlignText();
 }
 
+// 三段彈性空間平均分：左邊 | 卡片 | 中間 | 卡片 | 右邊 一樣闊
+cols.addSpacer();
 const c1 = cols.addStack();
 buildCol(c1, "駿景園 → 新城市", "ra", new Color("#ffffff"));
-
-cols.addSpacer();      // 剩餘空間放喺中間，兩張卡各占半邊
-
+cols.addSpacer();
 const c2 = cols.addStack();
 buildCol(c2, "新城市 → 駿景園", "ntp", new Color("#d2a679"));
+cols.addSpacer();
 
 // 建議 iOS 刷新時間：5 分鐘後，或最近嗰班車開出後（取其早）
 let refresh = new Date(now.getTime() + 5 * 60 * 1000);
