@@ -105,7 +105,7 @@ title.font = Font.boldSystemFont(12);
 title.textColor = new Color("#eaf2f8");
 top.addSpacer();
 const dow = now.getDay();
-const badge = top.addText(!hol ? "平日" : (dow === 0 || dow === 6 ? "六、日" : "假期"));
+const badge = top.addText(!hol ? "平日班次" : (dow === 0 || dow === 6 ? "六／日班次" : "公眾假期班次"));
 badge.font = Font.boldSystemFont(11);
 badge.textColor = new Color("#ffd166");
 
