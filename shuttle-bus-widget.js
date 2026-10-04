@@ -115,9 +115,25 @@ const cols = w.addStack();
 cols.layoutHorizontally();
 cols.topAlignContent();
 
-// 每張卡闊度：按螢幕闊度計，令兩邊啱啱好填滿成個長方型
-const screenW = Device.screenSize().width;
-const colW = Math.floor((screenW - 70) / 2);
+// 每張卡闊度：跟螢幕闊度計，但 clamp 落安全範圍
+// （闊度超出 widget 會令 Scriptable 將成個 layout 向左推、裁咗邊位）
+let sw = Device.screenSize().width;
+if (sw > 600) {
+  const scale = typeof Device.screenScale === "function" ? Device.screenScale() : 1;
+  sw = Math.round(sw / scale);
+}
+const colW = Math.max(115, Math.min(Math.floor((sw - 78) / 2), 150));
+
+// 喺直向 stack 入面置中一行字：左右夾彈性空間
+function ctext(col, str, font, color) {
+  const row = col.addStack();
+  row.layoutHorizontally();
+  row.addSpacer();
+  const x = row.addText(str);
+  x.font = font;
+  x.textColor = color;
+  row.addSpacer();
+}
 
 function buildCol(col, label, dir, accent) {
   // 每邊一張「卡片」：深色底 + 圓角 + 固定半邊闊度
@@ -130,24 +146,15 @@ function buildCol(col, label, dir, accent) {
   const tt = ttFor(dir, now);
   const i = tt.findIndex(x => mins(x) * 60 + 60 > nowTotal);
 
-  const lab = col.addText(label);
-  lab.font = Font.boldSystemFont(10);
-  lab.textColor = accent;
-  lab.centerAlignText();
+  ctext(col, label, Font.boldSystemFont(10), accent);
   col.addSpacer(4);
 
   if (i === -1) {
     const tmr = new Date(now);
     tmr.setDate(tmr.getDate() + 1);
     const ttt = ttFor(dir, tmr);
-    const l1 = col.addText("已開出晒");
-    l1.font = Font.boldSystemFont(14);
-    l1.textColor = new Color("#ff8a80");
-    l1.centerAlignText();
-    const l2 = col.addText("聽日 " + ttt[0]);
-    l2.font = Font.systemFont(11);
-    l2.textColor = new Color("#8ba3b5");
-    l2.centerAlignText();
+    ctext(col, "已開出晒", Font.boldSystemFont(14), new Color("#ff8a80"));
+    ctext(col, "聽日 " + ttt[0], Font.systemFont(11), new Color("#8ba3b5"));
     return;
   }
 
@@ -156,20 +163,14 @@ function buildCol(col, label, dir, accent) {
   const diffMin = Math.max(0, Math.ceil(diffSec / 60));
   depEnds.push(mins(next) + 1);
 
-  const big = col.addText(next);
-  big.font = Font.boldSystemFont(30);
-  big.textColor = accent;
-  big.centerAlignText();
-  const inn = col.addText(diffSec <= 0 ? "開緊" : "in " + diffMin + " min");
-  inn.font = Font.boldSystemFont(13);
-  inn.textColor = diffMin <= 2 ? new Color("#ff8a80") : new Color("#5ee0a0");
-  inn.centerAlignText();
+  ctext(col, next, Font.boldSystemFont(30), accent);
+  ctext(col,
+    diffSec <= 0 ? "開緊" : "in " + diffMin + " min",
+    Font.boldSystemFont(13),
+    diffMin <= 2 ? new Color("#ff8a80") : new Color("#5ee0a0"));
   col.addSpacer(2);
   const after = tt.slice(i + 1, i + 3).join(" · ");
-  const at = col.addText(after || "尾班車");
-  at.font = Font.systemFont(9);
-  at.textColor = new Color("#8ba3b5");
-  at.centerAlignText();
+  ctext(col, after || "尾班車", Font.systemFont(9), new Color("#8ba3b5"));
 }
 
 // 三段彈性空間平均分：左邊 | 卡片 | 中間 | 卡片 | 右邊 一樣闊
