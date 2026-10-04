@@ -104,7 +104,8 @@ const title = top.addText("NR815 駿景園 Shuttle");
 title.font = Font.boldSystemFont(12);
 title.textColor = new Color("#eaf2f8");
 top.addSpacer();
-const badge = top.addText(hol ? "假期" : "平日");
+const dow = now.getDay();
+const badge = top.addText(!hol ? "平日" : (dow === 0 || dow === 6 ? "六日" : "假期"));
 badge.font = Font.boldSystemFont(11);
 badge.textColor = new Color("#ffd166");
 
