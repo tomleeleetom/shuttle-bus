@@ -10,6 +10,7 @@
     --card: #182430;
     --card2: #1f2f3f;
     --accent: #4cc2ff;
+    --dir: #ffffff;
     --accent2: #ffd166;
     --text: #eaf2f8;
     --muted: #8ba3b5;
@@ -74,9 +75,9 @@
   }
   .dir-btn small { display: block; font-size: .72rem; font-weight: 400; margin-top: 2px; }
   .dir-btn.active {
-    background: rgba(76,194,255,.12);
-    border-color: var(--accent);
-    color: var(--text);
+    background: rgba(255,255,255,.06);
+    border-color: var(--dir);
+    color: var(--dir);
   }
 
   /* 日類型 */
@@ -105,7 +106,7 @@
 
   /* 倒數 */
   .now { text-align: center; color: var(--muted); font-size: .9rem; margin-bottom: 6px; }
-  .next-time { text-align: center; font-size: 3.4rem; font-weight: 800; letter-spacing: 1px; color: var(--accent); line-height: 1.1; }
+  .next-time { text-align: center; font-size: 3.4rem; font-weight: 800; letter-spacing: 1px; color: var(--dir); line-height: 1.1; }
   .countdown { text-align: center; font-size: 1.35rem; font-weight: 700; margin-top: 6px; }
   .countdown.soon { color: var(--warn); }
   .countdown.ok { color: var(--good); }
@@ -153,7 +154,7 @@
     font-variant-numeric: tabular-nums;
   }
   .tt span.past { opacity: .3; }
-  .tt span.next { background: rgba(76,194,255,.2); color: var(--accent); font-weight: 700; }
+  .tt span.next { background: rgba(255,255,255,.14); color: var(--dir); font-weight: 700; }
 
   .info { font-size: .82rem; color: var(--muted); line-height: 1.7; }
   .info b { color: var(--text); }
@@ -348,6 +349,8 @@ let overrideMode = 0;           // 0=自動, 1=強制平日, 2=強制六日假�
 
 function setDir(d) {
   dir = d;
+  // 方向色：駿景園白、新城市啡（同 widget 一致）
+  document.documentElement.style.setProperty("--dir", d === "ra" ? "#ffffff" : "#d2a679");
   document.getElementById("dirRA").classList.toggle("active", d === "ra");
   document.getElementById("dirNTP").classList.toggle("active", d === "ntp");
   render();
