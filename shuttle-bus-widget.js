@@ -115,9 +115,14 @@ const cols = w.addStack();
 cols.layoutHorizontally();
 cols.topAlignContent();
 
+// 每張卡闊度：按螢幕闊度計，令兩邊啱啱好填滿成個長方型
+const screenW = Device.screenSize().width;
+const colW = Math.floor((screenW - 70) / 2);
+
 function buildCol(col, label, dir, accent) {
-  // 每邊一張「卡片」：深色底 + 圓角，好似一個正方形格仔
+  // 每邊一張「卡片」：深色底 + 圓角 + 固定半邊闊度
   col.layoutVertically();
+  col.size = new Size(colW, 0);
   col.backgroundColor = new Color("#1b2836");
   col.cornerRadius = 12;
   col.setPadding(9, 11, 9, 11);
@@ -164,9 +169,7 @@ function buildCol(col, label, dir, accent) {
 const c1 = cols.addStack();
 buildCol(c1, "駿景園 → 新城市", "ra", new Color("#ffffff"));
 
-cols.addSpacer();      // 彈性空間：將兩張卡推去左右兩邊
-cols.addSpacer(8);     // 保證中間最少有 8pt 空隙
-cols.addSpacer();
+cols.addSpacer();      // 剩餘空間放喺中間，兩張卡各占半邊
 
 const c2 = cols.addStack();
 buildCol(c2, "新城市 → 駿景園", "ntp", new Color("#d2a679"));
