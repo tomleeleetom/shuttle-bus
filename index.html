@@ -29,7 +29,20 @@
   }
   .wrap { width: 100%; max-width: 460px; }
 
-  header { text-align: center; margin: 12px 0 18px; }
+  header { text-align: center; margin: 12px 0 18px; position: relative; }
+  .lang-btn {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    background: var(--card2);
+    color: var(--accent);
+    border: none;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
   header h1 { font-size: 1.45rem; letter-spacing: .5px; }
   header .sub { color: var(--muted); font-size: .85rem; margin-top: 4px; }
 
@@ -150,8 +163,9 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>駿景園 穿梭巴士</h1>
-    <div class="sub">NR815 · 駿景園 ⇄ 沙田新城市廣場第一期 · 冠忠遊覽車</div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+    <h1 id="tTitle">駿景園 穿梭巴士</h1>
+    <div class="sub" id="tSub">NR815 · 駿景園 ⇄ 沙田新城市廣場第一期 · 冠忠遊覽車</div>
   </header>
 
   <div class="card">
@@ -179,18 +193,18 @@
 
   <div class="card">
     <details>
-      <summary>全日班次時間表</summary>
+      <summary id="tSummary">全日班次時間表</summary>
       <div class="tt" id="fullTT"></div>
     </details>
   </div>
 
-  <div class="card info">
+  <div class="card info" id="tInfo">
     <b>車費：</b>$5.5（單程）<br>
     <b>上客點：</b>駿景園平台 / 新城市廣場第一期<br>
     <b>營辦商：</b>冠忠遊覽車有限公司（電話 2856 8391）
   </div>
 
-  <footer>
+  <footer id="tFooter">
     班次資料來源：駿景園官網（royalascothk.com）<br>
     實際班次或因交通情況調整，僅供參考
   </footer>
@@ -259,6 +273,75 @@ const PUBLIC_HOLIDAYS = new Set([
   "2027-09-16","2027-10-01","2027-10-08","2027-12-25","2027-12-27"
 ]);
 
+// ===== 語言 =====
+let lang = localStorage.getItem("ra-lang") || "zh";
+const I18N = {
+  zh: {
+    title: "駿景園 穿梭巴士",
+    sub: "NR815 · 駿景園 ⇄ 沙田新城市廣場第一期 · 冠忠遊覽車",
+    ra: "駿景園 開",
+    raTo: "往新城市廣場",
+    ntp: "新城市廣場 開",
+    ntpTo: "往駿景園",
+    weekday: "平日班次",
+    weekend: "六／日班次",
+    holiday: "公眾假期班次",
+    holidayManual: "假期班次（手動）",
+    ovAuto: "自動偵測 ▾",
+    ovWk: "手動：平日 ▾",
+    ovHol: "手動：假期 ▾",
+    now: "而家",
+    nextBus: "下一班車",
+    inPrefix: "仲有 ",
+    departing: "開出中！",
+    ended: "今日班次已開出晒",
+    firstTmr: "聽日頭班",
+    wkSvc: "平日班次",
+    holSvc: "假期班次",
+    upcoming: "之後班次",
+    agoSuffix: "後",
+    lastBus: "呢班係尾班車",
+    fullTT: "全日班次時間表",
+    infoHTML: "<b>車費：</b>$5.5（單程）<br><b>上客點：</b>駿景園平台 / 新城市廣場第一期<br><b>營辦商：</b>冠忠遊覽車有限公司（電話 2856 8391）",
+    footerHTML: "班次資料來源：駿景園官網（royalascothk.com）<br>實際班次或因交通情況調整，僅供參考",
+  },
+  en: {
+    title: "Royal Ascot Shuttle Bus",
+    sub: "NR815 · Royal Ascot ⇄ New Town Plaza Ph.1 · Kwoon Chung",
+    ra: "Royal Ascot",
+    raTo: "To New Town Plaza",
+    ntp: "New Town Plaza",
+    ntpTo: "To Royal Ascot",
+    weekday: "Weekday service",
+    weekend: "Sat / Sun service",
+    holiday: "Public holiday service",
+    holidayManual: "Holiday service (manual)",
+    ovAuto: "Auto-detect ▾",
+    ovWk: "Manual: Weekday ▾",
+    ovHol: "Manual: Holiday ▾",
+    now: "Now",
+    nextBus: "Next bus",
+    inPrefix: "in ",
+    departing: "Departing now!",
+    ended: "All buses for today have departed",
+    firstTmr: "First bus tomorrow",
+    wkSvc: "weekday service",
+    holSvc: "holiday service",
+    upcoming: "Upcoming",
+    agoSuffix: "",
+    lastBus: "Last bus of the day",
+    fullTT: "Full timetable",
+    infoHTML: "<b>Fare:</b> $5.5 per trip<br><b>Boarding:</b> Royal Ascot podium / New Town Plaza Phase 1<br><b>Operator:</b> Kwoon Chung Motors Co. (Tel 2856 8391)",
+    footerHTML: "Schedule source: royalascothk.com<br>Times may vary with traffic — for reference only",
+  }
+};
+function t(k) { return I18N[lang][k]; }
+function toggleLang() {
+  lang = lang === "zh" ? "en" : "zh";
+  localStorage.setItem("ra-lang", lang);
+  render();
+}
+
 // ===== 狀態 =====
 let dir = "ra";                 // "ra" = 駿景園開, "ntp" = 新城市開
 let overrideMode = 0;           // 0=自動, 1=強制平日, 2=強制六日假期
@@ -304,10 +387,10 @@ function getTimetable(d) {
 function dayLabel(d) {
   const type = effectiveDayType(d);
   const dow = d.getDay();
-  if (type === "weekday") return "平日班次";
-  if (overrideMode === 2 && autoDayType(d) === "weekday") return "假期班次（手動）";
-  if (dow === 0 || dow === 6) return "六／日班次";
-  return "公眾假期班次";
+  if (type === "weekday") return t("weekday");
+  if (overrideMode === 2 && autoDayType(d) === "weekday") return t("holidayManual");
+  if (dow === 0 || dow === 6) return t("weekend");
+  return t("holiday");
 }
 
 function toMins(t) {
@@ -318,12 +401,14 @@ function toMins(t) {
 function fmtCountdown(sec) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  if (m <= 0) return s + " 秒";
-  if (m >= 60) {
-    const h = Math.floor(m / 60);
-    return h + " 小時 " + (m % 60) + " 分";
+  if (lang === "zh") {
+    if (m <= 0) return s + " 秒";
+    if (m >= 60) return Math.floor(m / 60) + " 小時 " + (m % 60) + " 分";
+    return m + " 分 " + String(s).padStart(2, "0") + " 秒";
   }
-  return m + " 分 " + String(s).padStart(2, "0") + " 秒";
+  if (m <= 0) return s + "s";
+  if (m >= 60) return Math.floor(m / 60) + "h " + (m % 60) + "m";
+  return m + "m " + String(s).padStart(2, "0") + "s";
 }
 
 function render() {
@@ -331,12 +416,24 @@ function render() {
   const nowMin = now.getHours() * 60 + now.getMinutes();
   const nowSec = now.getSeconds();
 
+  // 靜態文字
+  document.documentElement.lang = lang === "zh" ? "zh-Hant" : "en";
+  document.title = t("title");
+  document.getElementById("langBtn").textContent = lang === "zh" ? "EN" : "中";
+  document.getElementById("tTitle").textContent = t("title");
+  document.getElementById("tSub").textContent = t("sub");
+  document.getElementById("dirRA").innerHTML = t("ra") + "<small>" + t("raTo") + "</small>";
+  document.getElementById("dirNTP").innerHTML = t("ntp") + "<small>" + t("ntpTo") + "</small>";
+  document.getElementById("tSummary").textContent = t("fullTT");
+  document.getElementById("tInfo").innerHTML = t("infoHTML");
+  document.getElementById("tFooter").innerHTML = t("footerHTML");
+
   document.getElementById("nowTime").textContent =
-    "而家 " + now.toTimeString().slice(0, 8);
+    t("now") + " " + now.toTimeString().slice(0, 8);
   document.getElementById("dayBadge").textContent = dayLabel(now);
   document.getElementById("overrideBtn").textContent =
-    overrideMode === 0 ? "自動偵測 ▾" :
-    overrideMode === 1 ? "手動：平日 ▾" : "手動：假期 ▾";
+    overrideMode === 0 ? t("ovAuto") :
+    overrideMode === 1 ? t("ovWk") : t("ovHol");
 
   const tt = getTimetable(now);
   const main = document.getElementById("main");
@@ -344,44 +441,48 @@ function render() {
 
   const nowTotal = nowMin * 60 + nowSec;
   // 班次 HH:MM 於該分鐘內（:00–:59）仍當作可以搭
-  const nextIdx = tt.findIndex(t => toMins(t) * 60 + 60 > nowTotal);
+  const nextIdx = tt.findIndex(x => toMins(x) * 60 + 60 > nowTotal);
 
   if (nextIdx === -1) {
     // 今日已無班次
     const tmr = new Date(now);
     tmr.setDate(tmr.getDate() + 1);
     const tmrTT = getTimetable(tmr);
+    const tmrSvc = effectiveDayType(tmr) === "weekday" ? t("wkSvc") : t("holSvc");
+    const LP = lang === "zh" ? "（" : " (";
+    const RP = lang === "zh" ? "）" : ")";
     main.innerHTML =
-      '<div class="ended">今日班次已開出晒<small>聽日頭班 ' + tmrTT[0] +
-      "（" + (effectiveDayType(tmr) === "weekday" ? "平日" : "假期") + "班次）</small></div>";
+      '<div class="ended">' + t("ended") + "<small>" + t("firstTmr") + " " + tmrTT[0] +
+      LP + tmrSvc + RP + "</small></div>";
     upcoming.innerHTML = "";
   } else {
     const next = tt[nextIdx];
     const diffSec = toMins(next) * 60 - nowTotal;
-    const cdText = diffSec <= 0 ? "開出中！" : "仲有 " + fmtCountdown(diffSec);
+    const cdText = diffSec <= 0 ? t("departing") : t("inPrefix") + fmtCountdown(diffSec);
     const cls = diffSec <= 120 ? "soon" : "ok";
     main.innerHTML =
-      '<div class="next-label">下一班車</div>' +
+      '<div class="next-label">' + t("nextBus") + "</div>" +
       '<div class="next-time">' + next + "</div>" +
       '<div class="countdown ' + cls + '">' + cdText + "</div>";
 
     const rest = tt.slice(nextIdx + 1, nextIdx + 4);
-    let html = "<h3>之後班次</h3>";
-    rest.forEach(t => {
-      const d = toMins(t) * 60 - nowTotal;
-      html += '<div class="bus-row"><span>' + t +
-        '</span><span class="in">' + fmtCountdown(d) + "後</span></div>";
+    let html = "<h3>" + t("upcoming") + "</h3>";
+    rest.forEach(x => {
+      const d = toMins(x) * 60 - nowTotal;
+      const cd = lang === "zh" ? fmtCountdown(d) + t("agoSuffix") : "in " + fmtCountdown(d);
+      html += '<div class="bus-row"><span>' + x +
+        '</span><span class="in">' + cd + "</span></div>";
     });
-    if (rest.length === 0) html += '<div class="bus-row"><span style="color:var(--muted)">呢班係尾班車</span></div>';
+    if (rest.length === 0) html += '<div class="bus-row"><span style="color:var(--muted)">' + t("lastBus") + "</span></div>";
     upcoming.innerHTML = html;
   }
 
   // 全日時間表
   const full = document.getElementById("fullTT");
-  full.innerHTML = tt.map(t => {
-    let cls = toMins(t) * 60 + 60 <= nowTotal ? "past" : "";
-    if (nextIdx !== -1 && t === tt[nextIdx]) cls = "next";
-    return '<span class="' + cls + '">' + t + "</span>";
+  full.innerHTML = tt.map(x => {
+    let cls = toMins(x) * 60 + 60 <= nowTotal ? "past" : "";
+    if (nextIdx !== -1 && x === tt[nextIdx]) cls = "next";
+    return '<span class="' + cls + '">' + x + "</span>";
   }).join("");
 }
 
