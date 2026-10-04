@@ -113,16 +113,22 @@ w.addSpacer(8);
 const depEnds = [];
 const cols = w.addStack();
 cols.layoutHorizontally();
-cols.centerAlignContent();
+cols.topAlignContent();
 
-function buildCol(col, label, dir) {
+function buildCol(col, label, dir, accent) {
+  // 每邊一張「卡片」：深色底 + 圓角，好似一個正方形格仔
+  col.layoutVertically();
+  col.backgroundColor = new Color("#1b2836");
+  col.cornerRadius = 12;
+  col.setPadding(9, 11, 9, 11);
+
   const tt = ttFor(dir, now);
   const i = tt.findIndex(x => mins(x) * 60 + 60 > nowTotal);
 
   const lab = col.addText(label);
   lab.font = Font.boldSystemFont(10);
-  lab.textColor = new Color("#8ba3b5");
-  col.addSpacer(3);
+  lab.textColor = accent;
+  col.addSpacer(4);
 
   if (i === -1) {
     const tmr = new Date(now);
@@ -144,7 +150,7 @@ function buildCol(col, label, dir) {
 
   const big = col.addText(next);
   big.font = Font.boldSystemFont(30);
-  big.textColor = new Color("#4cc2ff");
+  big.textColor = accent;
   const inn = col.addText(diffSec <= 0 ? "開緊" : "in " + diffMin + " min");
   inn.font = Font.boldSystemFont(13);
   inn.textColor = diffMin <= 2 ? new Color("#ff8a80") : new Color("#5ee0a0");
@@ -156,18 +162,14 @@ function buildCol(col, label, dir) {
 }
 
 const c1 = cols.addStack();
-c1.layoutVertically();
-buildCol(c1, "駿景園 → 新城市", "ra");
+buildCol(c1, "駿景園 → 新城市", "ra", new Color("#4cc2ff"));
 
-cols.addSpacer(10);
-const sep = cols.addText("│");
-sep.font = Font.systemFont(22);
-sep.textColor = new Color("#2a3b4d");
-cols.addSpacer(10);
+cols.addSpacer();      // 彈性空間：將兩張卡推去左右兩邊
+cols.addSpacer(8);     // 保證中間最少有 8pt 空隙
+cols.addSpacer();
 
 const c2 = cols.addStack();
-c2.layoutVertically();
-buildCol(c2, "新城市 → 駿景園", "ntp");
+buildCol(c2, "新城市 → 駿景園", "ntp", new Color("#ffb347"));
 
 // 建議 iOS 刷新時間：5 分鐘後，或最近嗰班車開出後（取其早）
 let refresh = new Date(now.getTime() + 5 * 60 * 1000);
