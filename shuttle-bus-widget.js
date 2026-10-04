@@ -162,14 +162,14 @@ function buildCol(col, label, dir, accent) {
 }
 
 const c1 = cols.addStack();
-buildCol(c1, "駿景園 → 新城市", "ra", new Color("#4cc2ff"));
+buildCol(c1, "駿景園 → 新城市", "ra", new Color("#ffffff"));
 
 cols.addSpacer();      // 彈性空間：將兩張卡推去左右兩邊
 cols.addSpacer(8);     // 保證中間最少有 8pt 空隙
 cols.addSpacer();
 
 const c2 = cols.addStack();
-buildCol(c2, "新城市 → 駿景園", "ntp", new Color("#ffb347"));
+buildCol(c2, "新城市 → 駿景園", "ntp", new Color("#d2a679"));
 
 // 建議 iOS 刷新時間：5 分鐘後，或最近嗰班車開出後（取其早）
 let refresh = new Date(now.getTime() + 5 * 60 * 1000);
