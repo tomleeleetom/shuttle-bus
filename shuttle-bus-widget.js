@@ -4,7 +4,7 @@
 // 2. Scriptable > + > paste this whole file > name it "Shuttle"
 // 3. Long-press home screen > + > Scriptable > Medium widget
 // 4. Long-press the widget > Edit Widget > Script = Shuttle
-//    Parameter: RA = 駿景園開 (default), NTP = 新城市廣場開
+//    （一個 widget 同時顯示兩個方向，唔使填 Parameter）
 // ============================================
 
 const RA_WEEKDAY = [
@@ -83,15 +83,15 @@ function isHol(d) {
 }
 function mins(x) { return parseInt(x.slice(0, 2)) * 60 + parseInt(x.slice(3)); }
 
-const param = ((args.widgetParameter || "") + "").trim().toUpperCase();
-const dir = param === "NTP" ? "ntp" : "ra";
-const dirName = dir === "ra" ? "駿景園 → 新城市廣場" : "新城市廣場 → 駿景園";
-
 const now = new Date();
 const nowTotal = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-const tt = isHol(now) ? (dir === "ra" ? RA_HOLIDAY : NTP_HOLIDAY)
-                      : (dir === "ra" ? RA_WEEKDAY : NTP_WEEKDAY);
-const i = tt.findIndex(x => mins(x) * 60 + 60 > nowTotal);
+const hol = isHol(now);
+
+function ttFor(dir, d) {
+  const h = isHol(d);
+  if (dir === "ra") return h ? RA_HOLIDAY : RA_WEEKDAY;
+  return h ? NTP_HOLIDAY : NTP_WEEKDAY;
+}
 
 const w = new ListWidget();
 w.backgroundColor = new Color("#0f1720");
@@ -100,55 +100,81 @@ w.setPadding(14, 14, 14, 14);
 
 const top = w.addStack();
 top.layoutHorizontally();
-const title = top.addText(dirName);
+const title = top.addText("NR815 駿景園 Shuttle");
 title.font = Font.boldSystemFont(12);
 title.textColor = new Color("#eaf2f8");
 top.addSpacer();
-const badge = top.addText(isHol(now) ? "假期" : "平日");
+const badge = top.addText(hol ? "假期" : "平日");
 badge.font = Font.boldSystemFont(11);
 badge.textColor = new Color("#ffd166");
 
 w.addSpacer(8);
 
-if (i === -1) {
-  const tmr = new Date(now);
-  tmr.setDate(tmr.getDate() + 1);
-  const ttt = isHol(tmr) ? (dir === "ra" ? RA_HOLIDAY : NTP_HOLIDAY)
-                         : (dir === "ra" ? RA_WEEKDAY : NTP_WEEKDAY);
-  const l1 = w.addText("今日班次已開出晒");
-  l1.font = Font.boldSystemFont(15);
-  l1.textColor = new Color("#ff8a80");
-  const l2 = w.addText("聽日頭班 " + ttt[0]);
-  l2.font = Font.systemFont(12);
-  l2.textColor = new Color("#8ba3b5");
-} else {
+const depEnds = [];
+const cols = w.addStack();
+cols.layoutHorizontally();
+cols.centerAlignContent();
+
+function buildCol(col, label, dir) {
+  const tt = ttFor(dir, now);
+  const i = tt.findIndex(x => mins(x) * 60 + 60 > nowTotal);
+
+  const lab = col.addText(label);
+  lab.font = Font.boldSystemFont(10);
+  lab.textColor = new Color("#8ba3b5");
+  col.addSpacer(3);
+
+  if (i === -1) {
+    const tmr = new Date(now);
+    tmr.setDate(tmr.getDate() + 1);
+    const ttt = ttFor(dir, tmr);
+    const l1 = col.addText("已開出晒");
+    l1.font = Font.boldSystemFont(14);
+    l1.textColor = new Color("#ff8a80");
+    const l2 = col.addText("聽日 " + ttt[0]);
+    l2.font = Font.systemFont(11);
+    l2.textColor = new Color("#8ba3b5");
+    return;
+  }
+
   const next = tt[i];
   const diffSec = mins(next) * 60 - nowTotal;
   const diffMin = Math.max(0, Math.ceil(diffSec / 60));
+  depEnds.push(mins(next) + 1);
 
-  const row = w.addStack();
-  row.layoutHorizontally();
-  row.centerAlignContent();
-  const tt1 = row.addText(next);
-  tt1.font = Font.boldSystemFont(36);
-  tt1.textColor = new Color("#4cc2ff");
-  row.addSpacer(10);
-  const tt2 = row.addText(diffSec <= 0 ? "開緊" : "in " + diffMin + " min");
-  tt2.font = Font.boldSystemFont(16);
-  tt2.textColor = diffMin <= 2 ? new Color("#ff8a80") : new Color("#5ee0a0");
-
-  w.addSpacer(6);
-  const after = tt.slice(i + 1, i + 4).join("  ·  ");
-  const at = w.addText("之後 " + (after || "尾班車"));
-  at.font = Font.systemFont(11);
+  const big = col.addText(next);
+  big.font = Font.boldSystemFont(30);
+  big.textColor = new Color("#4cc2ff");
+  const inn = col.addText(diffSec <= 0 ? "開緊" : "in " + diffMin + " min");
+  inn.font = Font.boldSystemFont(13);
+  inn.textColor = diffMin <= 2 ? new Color("#ff8a80") : new Color("#5ee0a0");
+  col.addSpacer(2);
+  const after = tt.slice(i + 1, i + 3).join(" · ");
+  const at = col.addText(after || "尾班車");
+  at.font = Font.systemFont(9);
   at.textColor = new Color("#8ba3b5");
 }
 
-// 建議 iOS 刷新時間：5 分鐘後，或呢班車開出後（取其早）
+const c1 = cols.addStack();
+c1.layoutVertically();
+buildCol(c1, "駿景園 → 新城市", "ra");
+
+cols.addSpacer(10);
+const sep = cols.addText("│");
+sep.font = Font.systemFont(22);
+sep.textColor = new Color("#2a3b4d");
+cols.addSpacer(10);
+
+const c2 = cols.addStack();
+c2.layoutVertically();
+buildCol(c2, "新城市 → 駿景園", "ntp");
+
+// 建議 iOS 刷新時間：5 分鐘後，或最近嗰班車開出後（取其早）
 let refresh = new Date(now.getTime() + 5 * 60 * 1000);
-if (i !== -1) {
+if (depEnds.length > 0) {
+  const m = Math.min.apply(null, depEnds);
   const dep = new Date(now);
-  dep.setHours(parseInt(tt[i].slice(0, 2)), parseInt(tt[i].slice(3)) + 1, 5, 0);
+  dep.setHours(Math.floor(m / 60), m % 60, 5, 0);
   if (dep < refresh) refresh = dep;
 }
 w.refreshAfterDate = refresh;
